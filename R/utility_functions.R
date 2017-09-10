@@ -37,6 +37,7 @@ backtest_portfolio_optimization <- function(list_symbols = c("SPY","EFA","EEM","
   funds <- colnames(returns.data) 
   portf_minvar <- portfolio.spec(assets=funds)
   portf_minvar <- add.constraint(portfolio=portf_minvar, type="full_investment")
+  portf_minvar <- add.constraint(portfolio=portf_minvar,type="box", min=0.0, max=0.50)
   portf_minvar <- add.objective(portfolio=portf_minvar, type="risk", name="var")
   
   list_cov = list()
@@ -86,6 +87,32 @@ backtest_portfolio_optimization <- function(list_symbols = c("SPY","EFA","EEM","
   out
 }
 
+
+#  ------------------------------------------------------------------------
+# method to calc stats
+
+get_stats <- function(returns, freq = 'months')
+{
+  if (freq == "months")
+    n = 12
+  else if (freq == "days")
+    n=252
+  annual_returns <- returns %>% 
+    select(2) %>% 
+    sapply(mean) * n
+  
+  
+  vol <- returns %>% 
+    select(2) %>% 
+    sapply(sd) * sqrt(n)
+  
+  sharpe <- annual_returns / vol
+  
+  out <- rbind(annual_returns,vol,sharpe)
+  out
+}
+
+#  ------------------------------------------------------------------------
 
 
 get_adj_close_from_yhoo <- function(ticker, from_date, to_date, freq='days',lag_days=0)

@@ -6,6 +6,7 @@ library(quantmod)
 library(PerformanceAnalytics)
 library(zoo)
 library(plotly)
+source("./R/utility_functions.R")
 
 # Get data
 getSymbols(c("MSFT", "SBUX", "IBM", "AAPL", "^GSPC", "AMZN"))
@@ -199,8 +200,16 @@ freq <- 'months'
 
 
 #  ------------------------------------------------------------------------
+source("./R/utility_functions.R")
 
-model <- backtest_portfolio_optimization(from = '2010-01-01')
+model <- backtest_portfolio_optimization(list_symbols <- c("SPY","EFA","EEM","TLT","USMV","MTUM","GLD","XLE"),
+                                         from = '2010-01-01')
+
+model <- backtest_portfolio_optimization(list_symbols <- c("SPY","TLT","GLD"),
+                                         from = '2010-01-01')
+
+model$weights
+#  ------------------------------------------------------------------------
 
 # plot
 model$returns %>% 
@@ -209,11 +218,50 @@ model$returns %>%
   ggplot(aes(index),size=1) +
   geom_line(aes(y = equity, color="portfolio")) +
   geom_line(aes(y = bench_equity, color="benchmark")) 
-  
+#  ------------------------------------------------------------------------
+
+get_stats(model$returns)
+get_stats(model$bench)
 
 
 
 #  ------------------------------------------------------------------------
+# area chart
+model$weights %>% rowSums
+
+
+create_allocation_plot(model$weights)
+#  ------------------------------------------------------------------------
+# Yes working allocation plot
+create_allocation_plot <- function(weights)
+{
+  df <- tk_tbl(weights)
+  tickers <- colnames(df)[-1]
+  df %>% 
+    gather( unlist(tickers),key = 'symbol', value ='weight') %>%  # gather is opposite of spread
+    ggplot() +
+    #geom_area(aes(colour = symbol, fill= weight), position = 'stack')   
+  
+    geom_bar(aes(x = index, y = weight, fill = symbol ), 
+             stat = "identity",
+             position = "fill")
+}
+    
+#  ------------------------------------------------------------------------
+create_allocation_plot_area <- function(weights)
+{
+  df <- tk_tbl(weights)
+  tickers <- colnames(df)[-1]
+  df %>% 
+    gather( unlist(tickers),key = 'symbol', value ='weight') %>%  # gather is opposite of spread
+    ggplot() +
+    geom_area(aes(x = index, y = weight, fill = symbol ), 
+             stat = "identity",
+             position = "fill")
+}
+
+  geom_bar(aes(y = TLT, color="TLT")) 
+
 
 
 model$returns %>% nrow 
