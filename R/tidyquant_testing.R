@@ -3,6 +3,32 @@ library(timetk)
 library(tidyquant)
 
 
+
+# Tidy Quant Walkthrough --------------------------------------------------
+# https://github.com/mdancho84/journal/blob/master/r_in_finance/R% --------
+
+sp500 <- tq_index("SP500")
+sp500
+
+stock_prices <- sp500 %>%
+  tq_get(get  = "stock.prices", 
+         from = "2007-01-01", 
+         to   = "2017-01-01")
+stock_prices
+
+sp500_returns <- stock_prices %>%
+  group_by(symbol) %>%
+  tq_transmute(select = adjusted, transform_fun = periodReturn, 
+               period = "daily", type = "log", col_rename = "dlr")
+sp500_returns
+
+object.size(stock_prices)
+
+sp500 %>% 
+  left_join()
+  mutate(mkt_cap = weight * shares_held)
+
+
 # timetk testing ----------------------------------------------------------
 # https://business-science.github.io/timetk/
 
